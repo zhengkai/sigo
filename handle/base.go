@@ -2,7 +2,7 @@ package handle
 
 import (
 	"bytes"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	"github.com/zhengkai/sigo/layout"
@@ -11,7 +11,7 @@ import (
 type BaseHandle struct {
 	uri    string
 	layout layout.Layout
-	data   interface{}
+	Data   interface{}
 }
 
 func (BaseHandle) DefaultLayout() layout.Layout {
@@ -24,12 +24,12 @@ func (this *BaseHandle) SetLayout(l layout.Layout) {
 
 func (this *BaseHandle) SetUri(s string) {
 	this.uri = s
-	fmt.Println(`set uri =`, this.uri)
+	// fmt.Println(`set uri =`, this.uri)
 }
 
 func (this *BaseHandle) Get(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.URL.Query())
-	this.data = make(map[string]interface{})
+	// fmt.Println(r.URL.Query())
+	this.Data = make(map[string]interface{})
 }
 
 func (this *BaseHandle) Parse() *bytes.Buffer {
@@ -37,5 +37,6 @@ func (this *BaseHandle) Parse() *bytes.Buffer {
 		this.layout = this.DefaultLayout()
 	}
 	this.layout.SetPath(this.uri)
+	this.layout.SetData(this.Data)
 	return this.layout.Parse()
 }
