@@ -2,8 +2,9 @@ package handle
 
 import (
 	"bytes"
-	// "fmt"
+	//"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/zhengkai/sigo/layout"
 )
@@ -18,8 +19,14 @@ type Handle interface {
 }
 
 func Register(uri string, data Handle) {
+
+	// fmt.Println(c, data)
+	// fmt.Printf("%T %T\n", c, data)
+
 	http.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
-		d := data.Clone()
+
+		d := reflect.New(reflect.ValueOf(data).Elem().Type()).Interface().(Handle)
+		// fmt.Printf("%T %T\n", d, c)
 		d.SetUri(uri)
 		d.Get(w, r)
 		w.Write(d.Parse().Bytes())

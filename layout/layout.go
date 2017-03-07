@@ -2,7 +2,7 @@ package layout
 
 import (
 	"bytes"
-	"fmt"
+	// "fmt"
 	"html/template"
 )
 
@@ -30,7 +30,7 @@ func (this *BaseLayout) SetPath(s string) {
 func (this *BaseLayout) Parse() *bytes.Buffer {
 
 	if this.Buffer == nil {
-		fmt.Println(`buf init`)
+		// fmt.Println(`buf init`)
 		this.Buffer = new(bytes.Buffer)
 	} else {
 		this.Buffer.Reset()
@@ -45,6 +45,12 @@ func (this *BaseLayout) Parse() *bytes.Buffer {
 }
 
 func (this *BaseLayout) ParseTpl(s string) {
-	tpl, _ := template.ParseFiles(s)
+
+	// tpl, _ := template.ParseFiles(s)
+	tpl := TplPool.Get(s)
+	if tpl == nil {
+		return
+	}
+
 	tpl.Execute(this.Buffer, this.Data)
 }

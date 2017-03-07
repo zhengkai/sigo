@@ -2,7 +2,7 @@ package handle
 
 import (
 	"bytes"
-	"fmt"
+	// "fmt"
 	"net/http"
 
 	"github.com/zhengkai/sigo/layout"
@@ -22,8 +22,8 @@ func (this *BaseHandle) SetLayout(l layout.Layout) {
 	this.layout = l
 }
 
-func (this *BaseHandle) Clone() Handle {
-	c := *this
+func (this BaseHandle) Clone() Handle {
+	c := this
 	return &c
 }
 
@@ -39,7 +39,7 @@ func (this *BaseHandle) Get(w http.ResponseWriter, r *http.Request) {
 
 func (this *BaseHandle) Parse() *bytes.Buffer {
 	if this.layout == nil {
-		fmt.Println(`new Parse`)
+		// fmt.Println(`new Parse`)
 		this.layout = this.DefaultLayout()
 	}
 	this.layout.SetPath(this.uri)
