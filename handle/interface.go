@@ -2,6 +2,7 @@ package handle
 
 import (
 	"bytes"
+	"time"
 	//"fmt"
 	"net/http"
 	"reflect"
@@ -11,23 +12,23 @@ import (
 
 type Handle interface {
 	SetUri(string)
+	SetStartTime(time.Time)
 	Get(w http.ResponseWriter, r *http.Request)
 	Parse() *bytes.Buffer
 	SetLayout(layout.Layout)
 	DefaultLayout() layout.Layout
-	Clone() Handle
 }
 
-func Register(uri string, data Handle) {
-
-	// fmt.Println(c, data)
-	// fmt.Printf("%T %T\n", c, data)
+func Register(uri string, h Handle) {
 
 	http.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
 
-		d := reflect.New(reflect.ValueOf(data).Elem().Type()).Interface().(Handle)
-		// fmt.Printf("%T %T\n", d, c)
+		t := time.Now()
+
+		d := reflect.New(reflect.ValueOf(h).Elem().Type()).Interface().(Handle)
+
 		d.SetUri(uri)
+		d.SetStartTime(t)
 		d.Get(w, r)
 		w.Write(d.Parse().Bytes())
 	})
