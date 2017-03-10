@@ -14,7 +14,7 @@ type BaseHandle struct {
 	uri    string
 	layout layout.Layout
 	Data   map[string]interface{}
-	Head   *Head
+	Head   Head
 }
 
 func (BaseHandle) DefaultLayout() layout.Layout {
@@ -25,14 +25,14 @@ func (this *BaseHandle) SetLayout(l layout.Layout) {
 	this.layout = l
 }
 
-func (this BaseHandle) Clone() Handle {
+func (this BaseHandle) New() Handle {
 	c := this
+	c.Head = new(BaseHead).New()
 	return &c
 }
 
 func (this *BaseHandle) SetUri(s string) {
 	this.uri = s
-	this.Head = new(Head)
 	// fmt.Println(`set uri =`, this)
 }
 

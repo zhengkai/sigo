@@ -1,43 +1,54 @@
 package handle
 
 import (
-// "fmt"
+	// "fmt"
+	"html/template"
 )
 
-type Head struct {
+type BaseHead struct {
 	Data   map[string]interface{}
-	IsInit bool
+	Unique map[string]bool
 }
 
-func (this *Head) Init() {
-	if this.IsInit {
-		// fmt.Println(`head init skip`)
+func (this BaseHead) New() Head {
+	c := this
+	c.Data = make(map[string]interface{})
+	c.Unique = make(map[string]bool)
+	return &c
+}
+
+func (this *BaseHead) AddJS(s string) {
+	this.AddData(`js`, s)
+}
+
+func (this *BaseHead) AddCSS(s string) {
+	this.AddData(`css`, s)
+}
+
+func (this *BaseHead) AddMeta(s string) {
+	this.AddData(`meta`, s)
+}
+
+func (this *BaseHead) AddData(k, v string) {
+	if _, ok := this.Unique[v]; ok {
 		return
 	}
-	d := make(map[string]interface{})
-	d[`js`] = make(map[string]bool)
-	d[`css`] = make(map[string]bool)
-	d[`meta`] = make(map[string]bool)
-	this.Data = d
-	this.IsInit = true
-	// fmt.Println(`head init`)
+
+	if k == `meta` {
+		if _, ok := this.Data[k]; !ok {
+			this.Data[k] = []template.HTML{}
+		}
+		this.Data[k] = append(this.Data[k].([]template.HTML), template.HTML(v))
+		return
+	}
+
+	if _, ok := this.Data[k]; !ok {
+		this.Data[k] = []string{}
+	}
+	this.Data[k] = append(this.Data[k].([]string), v)
 }
 
-func (this *Head) AddJS(s string) {
-	this.Init()
-	this.Data[`js`].(map[string]bool)[s] = true
-}
-
-func (this *Head) AddCSS(s string) {
-	this.Init()
-	this.Data[`css`].(map[string]bool)[s] = true
-}
-func (this *Head) AddMeta(s string) {
-	this.Init()
-	this.Data[`meta`].(map[string]bool)[s] = true
-}
-
-func (this *Head) Export() map[string]interface{} {
-	this.Init()
+func (this *BaseHead) Export() map[string]interface{} {
+	// fmt.Println(this.Data)
 	return this.Data
 }
