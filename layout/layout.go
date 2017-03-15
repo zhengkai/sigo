@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"regexp"
+	"sync/atomic"
 	"time"
 )
 
 var (
-	bCache = true
+	bCache             = false
+	connectCount int64 = 0
 )
 
 type Layout interface {
@@ -44,27 +45,20 @@ func (this *BaseLayout) Parse() *bytes.Buffer {
 
 	this.ParseBaseTpl(`head`)
 	this.ParseBaseTpl(`nav`)
+
+	this.Buffer.WriteString("\n<div class=\"main container\">\n")
 	this.ParseTpl(`tpl` + this.Path + `.html`)
+	this.Buffer.WriteString("</div>\n")
 
 	//time.Sleep(123 * time.Millisecond)
 
 	t := this.Data.(map[string]interface{})[`_time`].(time.Time)
 	td := float64(time.Now().Sub(t).Nanoseconds())/1000000 + 0.0005
 	this.Data.(map[string]interface{})[`_stime`] = fmt.Sprintf(`%.03f`, td)
+	this.Data.(map[string]interface{})[`_count`] = atomic.AddInt64(&connectCount, 1)
 	this.ParseBaseTpl(`foot`)
 
 	return this.Buffer
-}
-
-func formatCommas(num string) string {
-	re := regexp.MustCompile("(\\d+)(\\d{3})")
-	for {
-		formatted := re.ReplaceAllString(num, "$1,$2")
-		if formatted == num {
-			return formatted
-		}
-		num = formatted
-	}
 }
 
 func (this *BaseLayout) ParseTpl(file string) {

@@ -13,8 +13,9 @@ import (
 type Handle interface {
 	SetUri(string)
 	SetStartTime(time.Time)
-	Get(w http.ResponseWriter, r *http.Request)
+	Get(r *http.Request)
 	Parse() *bytes.Buffer
+	Prepare(w http.ResponseWriter, r *http.Request) bool
 	New() Handle
 	SetLayout(layout.Layout)
 	DefaultLayout() layout.Layout
@@ -42,8 +43,11 @@ func Register(uri string, h Handle) {
 		// fmt.Println(d)
 
 		d.SetUri(uri)
+		if !d.Prepare(w, r) {
+			return
+		}
 		d.SetStartTime(t)
-		d.Get(w, r)
+		d.Get(r)
 		w.Write(d.Parse().Bytes())
 	})
 }
