@@ -114,9 +114,15 @@ func (this *BaseHandle) OutputHTML() *bytes.Buffer {
 	return this.layout.Parse()
 }
 
+func (this *BaseHandle) Redirect(uri string) {
+	http.Redirect(this.W, this.R, uri, 302)
+}
+
 func (this *BaseHandle) OutputJSON() *bytes.Buffer {
+	this.W.Header().Set(`Content-Type`, `application/json; charset=utf-8`)
 	buf := new(bytes.Buffer)
 	b, _ := json.Marshal(this.Data)
+	// fmt.Println(`json`, this.Data)
 	buf.Write(b)
 	return buf
 }

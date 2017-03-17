@@ -20,6 +20,7 @@ type Handle interface {
 	New() Handle
 	SetLayout(layout.Layout)
 	DefaultLayout() layout.Layout
+	Redirect(uri string)
 }
 
 type Head interface {
