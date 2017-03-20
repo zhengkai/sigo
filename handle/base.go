@@ -125,6 +125,7 @@ func (this *BaseHandle) OutputHTML() *bytes.Buffer {
 	// fmt.Println(this.Data)
 
 	if this.Error != `` {
+		this.W.WriteHeader(http.StatusInternalServerError)
 		this.Uri = `/error/500`
 		e := make(map[string]string)
 		this.Data.(map[string]interface{})[`_error`] = e
