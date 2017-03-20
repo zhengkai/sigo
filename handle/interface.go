@@ -1,7 +1,7 @@
 package handle
 
 import (
-	"bytes"
+
 	// "fmt"
 	"net/http"
 	"time"
@@ -14,7 +14,7 @@ type Handle interface {
 	SetUri(string)
 	SetStartTime(time.Time)
 	Parse()
-	Output() *bytes.Buffer
+	Output()
 	SetHttp(w http.ResponseWriter, r *http.Request)
 	Prepare() bool
 	New() Handle
@@ -51,6 +51,6 @@ func Register(uri string, h Handle) {
 		}
 		d.SetStartTime(t)
 		d.Parse()
-		w.Write(d.Output().Bytes())
+		d.Output()
 	})
 }

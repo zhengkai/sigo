@@ -33,6 +33,7 @@ type BaseHandle struct {
 	Cookie      []*http.Cookie
 	W           http.ResponseWriter
 	R           *http.Request
+	StopStatus  int
 }
 
 func (BaseHandle) DefaultLayout() layout.Layout {
@@ -61,6 +62,11 @@ func (this *BaseHandle) SetUri(s string) {
 	this.Uri = s
 }
 
+func (this *BaseHandle) StopByStatus(status int) {
+	this.W.WriteHeader(status)
+	this.StopStatus = status
+}
+
 func (this *BaseHandle) SetHttp(w http.ResponseWriter, r *http.Request) {
 	this.W = w
 	this.R = r
@@ -73,18 +79,36 @@ func (this *BaseHandle) SetStartTime(t time.Time) {
 func (this *BaseHandle) Parse() {
 }
 
-func (this *BaseHandle) Output() *bytes.Buffer {
+func (this *BaseHandle) Output() {
+
+	if this.StopStatus > 0 {
+		this.W.Header().Set(`Content-Type`, `text/plain; charset=utf-8`)
+		this.W.Write([]byte(`HTTP ` + strconv.Itoa(this.StopStatus) + ` ` + http.StatusText(this.StopStatus)))
+		return
+	}
+
+	var buf *bytes.Buffer
 
 	switch this.ContentType {
 	case Json:
-		return this.OutputJSON()
+		buf = this.OutputJSON()
 	case Html:
-		return this.OutputHTML()
+		buf = this.OutputHTML()
 	default:
-		buf := new(bytes.Buffer)
+		buf = new(bytes.Buffer)
 		buf.WriteString(`no support type ` + strconv.Itoa(int(this.ContentType)))
-		return buf
 	}
+
+	this.W.Write(buf.Bytes())
+}
+
+func (this *BaseHandle) CheckPost() bool {
+	// fmt.Println(`referer`, this.R.Header.Get(`Referer`))
+	if this.R.Method != http.MethodPost {
+		this.StopByStatus(http.StatusMethodNotAllowed)
+		return false
+	}
+	return true
 }
 
 func (this *BaseHandle) OutputHTML() *bytes.Buffer {
