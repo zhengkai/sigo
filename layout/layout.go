@@ -29,7 +29,6 @@ type BaseLayout struct {
 }
 
 func (this *BaseLayout) SetFunc(f template.FuncMap) {
-	fmt.Println(`call SetFunc`)
 	this.FuncMap = f
 }
 
