@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
@@ -34,6 +35,7 @@ type BaseHandle struct {
 	W           http.ResponseWriter
 	R           *http.Request
 	StopStatus  int
+	TplFuncMap  template.FuncMap
 }
 
 func (BaseHandle) DefaultLayout() layout.Layout {
@@ -41,6 +43,13 @@ func (BaseHandle) DefaultLayout() layout.Layout {
 }
 
 func (this *BaseHandle) AddCookie(*http.Cookie) {
+}
+
+func (this *BaseHandle) SetTplFunc(name string, fn interface{}) {
+	if this.TplFuncMap == nil {
+		this.TplFuncMap = make(template.FuncMap)
+	}
+	this.TplFuncMap[name] = fn
 }
 
 func (this *BaseHandle) SetLayout(l layout.Layout) {
@@ -136,6 +145,11 @@ func (this *BaseHandle) OutputHTML() *bytes.Buffer {
 
 	this.layout.SetPath(this.Uri)
 	this.layout.SetData(this.Data)
+
+	if this.TplFuncMap != nil {
+		this.layout.SetFunc(this.TplFuncMap)
+	}
+
 	return this.layout.Parse()
 }
 

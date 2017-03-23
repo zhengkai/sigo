@@ -14,6 +14,7 @@ var (
 )
 
 type Layout interface {
+	SetFunc(f template.FuncMap)
 	SetPath(string)
 	SetData(interface{})
 	Parse() *bytes.Buffer
@@ -24,6 +25,12 @@ type BaseLayout struct {
 	Data     interface{}
 	TplCache *template.Template
 	Buffer   *bytes.Buffer
+	FuncMap  template.FuncMap
+}
+
+func (this *BaseLayout) SetFunc(f template.FuncMap) {
+	fmt.Println(`call SetFunc`)
+	this.FuncMap = f
 }
 
 func (this *BaseLayout) SetData(d interface{}) {
@@ -69,7 +76,11 @@ func (this *BaseLayout) ParseTpl(file string) {
 	if bCache {
 		tpl = TplPool.Get(file)
 	} else {
-		tpl, err = template.ParseFiles(file)
+		if this.FuncMap != nil {
+			tpl, err = template.New(`k`).Option(`missingkey=zero`).Funcs(this.FuncMap).ParseFiles(file)
+		} else {
+			tpl, err = template.ParseFiles(file)
+		}
 		if err != nil {
 			fmt.Println(`template error`, err)
 			return
@@ -79,7 +90,14 @@ func (this *BaseLayout) ParseTpl(file string) {
 		return
 	}
 
-	tpl.Execute(this.Buffer, this.Data)
+	if this.FuncMap != nil {
+		err = tpl.ExecuteTemplate(this.Buffer, `main`, this.Data)
+	} else {
+		err = tpl.Execute(this.Buffer, this.Data)
+	}
+	if err != nil {
+		fmt.Println(`file`, file, `tpl.Execute error:`, err)
+	}
 }
 
 func (this *BaseLayout) ParseBaseTpl(name string) {

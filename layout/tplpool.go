@@ -9,10 +9,10 @@ import (
 
 var (
 	TplPool = Tpl{Pool: make(map[string]*template.Template)}
-	funcMap = template.FuncMap{
+	FuncMap = template.FuncMap{
 		"HasSuffix": strings.HasSuffix,
 	}
-	BaseTpl, _ = template.New(`Base`).Funcs(funcMap).ParseFiles(`tpl/common.html`)
+	BaseTpl, _ = template.New(`Base`).Funcs(FuncMap).ParseFiles(`tpl/common.html`)
 )
 
 type Tpl struct {
